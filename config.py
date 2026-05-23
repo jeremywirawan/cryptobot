@@ -1,0 +1,13 @@
+import os
+
+API_KEY = os.getenv("ICYCRPK1-A6BUOFSG-QFJKHIVA-PL8KPZRG-0AIRJVIV")
+SECRET = os.getenv("ecc2d00b86dcc65e5ca0980c0526bc8bc0da8512832bc9850b88bc07b1159c724b391869bcdd0aa6")
+
+TELEGRAM_TOKEN = os.getenv("8655829258:AAHg4rQVmuG-cPemS3Ivh2KYF57qIkprQT4")
+CHAT_ID = os.getenv("8923300713")
+
+PAIRS = [
+    "BTC/IDR",
+    "ETH/IDR",
+    "SOL/IDR"
+]
