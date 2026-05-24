@@ -8,8 +8,11 @@ def home():
 
     return "Crypto bot is running."
 
-@app.route("/run")
-def run():
+@app.route("/run/<secret>")
+def run(secret):
+
+    if secret != "jeremytradingbot":
+        return "Unauthorized"
 
     run_bot()
 
