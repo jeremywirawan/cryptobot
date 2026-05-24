@@ -15,6 +15,8 @@ from strategy import check_signal
 
 import paper_wallet
 
+wallet = paper_wallet.load_wallet()
+
 import requests
 
 exchange = ccxt.indodax({
@@ -47,8 +49,8 @@ def log_trade(action, pair, price):
             pair,
             action,
             price,
-            paper_wallet.cash,
-            paper_wallet.holdings[pair]
+            wallet["cash"],
+            wallet["holdings"][pair]
         ])
 
 def run_bot():
@@ -74,19 +76,19 @@ def run_bot():
 
             signal, rsi, ema200 = check_signal(ohlcv)
 
-            # COOLDOWN CHECK
-            if paper_wallet.last_trade_time:
+            # # COOLDOWN CHECK
+            # if wallet["last_trade_time"]:
 
-                cooldown = (
-                    datetime.now()
-                    - paper_wallet.last_trade_time
-                )
+            #     cooldown = (
+            #         datetime.now()
+            #         - wallet["last_trade_time"]
+            #     )
 
-                if cooldown < timedelta(hours=3):
+            #     if cooldown < timedelta(hours=3):
 
-                    print("Cooldown active.")
+            #         print("Cooldown active.")
 
-                    signal = "HOLD"
+            #         signal = "HOLD"
 
             print(f"Price: Rp{current_price}")
             print(f"Signal: {signal}")
@@ -100,16 +102,16 @@ def run_bot():
             )
 
             # BUY
-            if signal == "BUY" and paper_wallet.cash > 0:
+            if signal == "BUY" and wallet["cash"] > 0:
 
                 amount_btc = (
-                    paper_wallet.cash / current_price
+                    wallet["cash"] / current_price
                 )
 
-                paper_wallet.holdings[pair] = amount_btc
-                paper_wallet.cash = 0
+                wallet["holdings"][pair] = amount_btc
+                wallet["cash"] = 0
 
-                paper_wallet.last_buy_price[pair] = current_price
+                wallet["last_buy_price"][pair] = current_price
 
                 print(
                     f"SIMULATED BUY {pair} at Rp{current_price}"
@@ -125,12 +127,13 @@ def run_bot():
                     current_price
                 )
 
-                paper_wallet.last_trade_time = datetime.now()
+                wallet["last_trade_time"] = datetime.now()
+                paper_wallet.save_wallet(wallet)
 
             # SELL MANAGEMENT
-            elif paper_wallet.holdings[pair] > 0:
+            elif wallet["holdings"][pair] > 0:
 
-                buy_price = paper_wallet.last_buy_price[pair]
+                buy_price = wallet["last_buy_price"][pair]
 
                 change_percent = (
                     (current_price - buy_price)
@@ -144,11 +147,11 @@ def run_bot():
                 # TAKE PROFIT
                 if change_percent >= 3:
 
-                    paper_wallet.cash = (
-                        paper_wallet.holdings[pair] * current_price
+                    wallet["cash"] = (
+                        wallet["holdings"][pair] * current_price
                     )
 
-                    paper_wallet.holdings[pair] = 0
+                    wallet["holdings"][pair] = 0
 
                     print(
                         f"TAKE PROFIT {pair} at Rp{current_price}"
@@ -164,18 +167,19 @@ def run_bot():
                         current_price
                     )
 
-                    paper_wallet.total_trades += 1
-                    paper_wallet.winning_trades += 1
-                    paper_wallet.last_trade_time = datetime.now()
+                    wallet["total_trades"] += 1
+                    wallet["winning_trades"] += 1
+                    wallet["last_trade_time"] = datetime.now()
+                    paper_wallet.save_wallet(wallet)
 
                 # STOP LOSS
                 elif change_percent <= -2:
 
-                    paper_wallet.cash = (
-                        paper_wallet.holdings[pair] * current_price
+                    wallet["cash"] = (
+                        wallet["holdings"][pair] * current_price
                     )
 
-                    paper_wallet.holdings[pair] = 0
+                    wallet["holdings"][pair] = 0
 
                     print(
                         f"STOP LOSS {pair} at Rp{current_price}"
@@ -191,18 +195,19 @@ def run_bot():
                         current_price
                     )
 
-                    paper_wallet.total_trades += 1
-                    paper_wallet.losing_trades += 1
-                    paper_wallet.last_trade_time = datetime.now()
+                    wallet["total_trades"] += 1
+                    wallet["losing_trades"] += 1
+                    wallet["last_trade_time"] = datetime.now()
+                    paper_wallet.save_wallet(wallet)
 
                 # RSI SELL
                 elif signal == "SELL":
 
-                    paper_wallet.cash = (
-                        paper_wallet.holdings[pair] * current_price
+                    wallet["cash"] = (
+                        wallet["holdings"][pair] * current_price
                     )
 
-                    paper_wallet.holdings[pair] = 0
+                    wallet["holdings"][pair] = 0
 
                     print(
                         f"RSI SELL {pair} at Rp{current_price}"
@@ -218,8 +223,9 @@ def run_bot():
                         current_price
                     )
 
-                    paper_wallet.total_trades += 1
-                    paper_wallet.last_trade_time = datetime.now()
+                    wallet["total_trades"] += 1
+                    wallet["last_trade_time"] = datetime.now()
+                    paper_wallet.save_wallet(wallet)
 
                 else:
                     log_trade(
@@ -236,16 +242,16 @@ def run_bot():
                 )
 
             portfolio_value = (
-                paper_wallet.cash
-                + (paper_wallet.holdings[pair] * current_price)
+                wallet["cash"]
+                + (wallet["holdings"][pair] * current_price)
             )
 
-            print(f"Cash: Rp{paper_wallet.cash:,.0f}")
+            print(f"Cash: Rp{wallet['cash']:,.0f}")
             coin_name = pair.split('/')[0]
 
             print(
                 f"{coin_name}: "
-                f"{paper_wallet.holdings[pair]}"
+                f"{wallet['holdings'][pair]}"
             )
 
             print(
@@ -253,26 +259,26 @@ def run_bot():
             )
 
             print(
-                f"Total Trades: {paper_wallet.total_trades}"
+                f"Total Trades: {wallet['total_trades']}"
             )
 
             print(
-                f"Wins: {paper_wallet.winning_trades}"
+                f"Wins: {wallet['winning_trades']}"
             )
 
             print(
-                f"Losses: {paper_wallet.losing_trades}"
+                f"Losses: {wallet['losing_trades']}"
             )
             coin_name = pair.split('/')[0]
 
             telegram_report += (
-                f"Cash: Rp{paper_wallet.cash:,.0f}\n"
+                f"Cash: Rp{wallet["cash"]:,.0f}\n"
                 f"{coin_name}: "
-                f"{paper_wallet.holdings[pair]}\n"
+                f"{wallet["holdings"][pair]}\n"
                 f"Portfolio Value: Rp{portfolio_value:,.0f}\n"
-                f"Total Trades: {paper_wallet.total_trades}\n"
-                f"Wins: {paper_wallet.winning_trades}\n"
-                f"Losses: {paper_wallet.losing_trades}\n\n"
+                f"Total Trades: {wallet["total_trades"]}\n"
+                f"Wins: {wallet["winning_trades"]}\n"
+                f"Losses: {wallet["losing_trades"]}\n\n"
             )
         send_telegram(telegram_report)
 
