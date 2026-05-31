@@ -10,4 +10,8 @@
         "ETH/IDR": 35882000.0,
         "SOL/IDR": 0
     },
-    "last_trade_time": 
+    "last_trade_time": 0,
+    "total_trades": 0,
+    "winning_trades": 0,
+    "losing_trades": 0
+}
