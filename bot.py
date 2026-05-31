@@ -127,7 +127,7 @@ def run_bot():
                     current_price
                 )
 
-                wallet["last_trade_time"] = datetime.now()
+                wallet["last_trade_time"] = datetime.now().isoformat()
                 paper_wallet.save_wallet(wallet)
 
             # SELL MANAGEMENT
@@ -169,7 +169,7 @@ def run_bot():
 
                     wallet["total_trades"] += 1
                     wallet["winning_trades"] += 1
-                    wallet["last_trade_time"] = datetime.now()
+                    wallet["last_trade_time"] = datetime.now().isoformat()
                     paper_wallet.save_wallet(wallet)
 
                 # STOP LOSS
@@ -197,7 +197,7 @@ def run_bot():
 
                     wallet["total_trades"] += 1
                     wallet["losing_trades"] += 1
-                    wallet["last_trade_time"] = datetime.now()
+                    wallet["last_trade_time"] = datetime.now().isoformat()
                     paper_wallet.save_wallet(wallet)
 
                 # RSI SELL
@@ -224,7 +224,7 @@ def run_bot():
                     )
 
                     wallet["total_trades"] += 1
-                    wallet["last_trade_time"] = datetime.now()
+                    wallet["last_trade_time"] = datetime.now().isoformat()
                     paper_wallet.save_wallet(wallet)
 
                 else:
