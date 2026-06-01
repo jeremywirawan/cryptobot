@@ -276,10 +276,14 @@ def run_bot():
                 f"{coin_name}: "
                 f"{wallet['holdings'][pair]}\n"
                 f"Portfolio Value: Rp{portfolio_value:,.0f}\n"
-                f"Total Trades: {wallet['total_trades']}\n"
-                f"Wins: {wallet['winning_trades']}\n"
-                f"Losses: {wallet['losing_trades']}\n\n"
+                "------------------\n\n"
             )
+        telegram_report += (
+            "Portfolio Stats\n"
+            f"Total Trades: {wallet['total_trades']}\n"
+            f"Wins: {wallet['winning_trades']}\n"
+            f"Losses: {wallet['losing_trades']}\n"
+        )
         send_telegram(telegram_report)
 
     except Exception as e:
