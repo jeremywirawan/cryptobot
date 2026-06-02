@@ -1,17 +1,17 @@
 {
-    "cash": 0,
+    "cash": 959212.2462150715,
     "holdings": {
         "BTC/IDR": 0,
         "ETH/IDR": 0,
-        "SOL/IDR": 0.6817424054532097
+        "SOL/IDR": 0
     },
     "last_buy_price": {
         "BTC/IDR": 0,
         "ETH/IDR": 35882000.0,
         "SOL/IDR": 1436252.0
     },
-    "last_trade_time": "2026-06-01T08:00:38.477389",
-    "total_trades": 1,
+    "last_trade_time": "2026-06-02T12:20:42.436701",
+    "total_trades": 2,
     "winning_trades": 0,
-    "losing_trades": 1
+    "losing_trades": 2
 }
