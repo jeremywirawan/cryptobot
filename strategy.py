@@ -53,13 +53,13 @@ def check_signal(ohlcv):
 
     # BUY
     if (
-        current_rsi < 45
+        current_rsi < 40
     ):
 
         signal = "BUY"
 
     # SELL
-    elif current_rsi > 65:
+    elif current_rsi > 70:
 
         signal = "SELL"
 
