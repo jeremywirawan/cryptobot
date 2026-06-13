@@ -1,6 +1,3 @@
 __pycache__/
 *.pyc
 .env
-
-wallet.json
-trades.csv
