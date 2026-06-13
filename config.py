@@ -8,6 +8,6 @@ CHAT_ID = os.getenv("CHAT_ID")
 
 PAIRS = [
     "BTC/IDR",
-    "ETH/IDR",
+    #"ETH/IDR",
     "SOL/IDR"
 ]

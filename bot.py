@@ -74,7 +74,31 @@ def run_bot():
 
             current_price = ticker['last']
 
-            signal, rsi, ema200 = check_signal(ohlcv)
+            signal, rsi, ema200, price = check_signal(ohlcv)
+
+            signal = "HOLD"
+
+            if pair == "BTC/IDR":
+
+                if (
+                    rsi < 40
+                    and price > ema200
+                ):
+                    signal = "BUY"
+
+                elif rsi > 70:
+                    signal = "SELL"
+
+            elif pair == "SOL/IDR":
+
+                if (
+                    rsi < 34
+                    and price > ema200
+                ):
+                    signal = "BUY"
+
+                elif rsi > 65:
+                    signal = "SELL"
 
             # # COOLDOWN CHECK
             # if wallet["last_trade_time"]:
@@ -90,25 +114,31 @@ def run_bot():
 
             #         signal = "HOLD"
 
-            print(f"Price: Rp{current_price}")
-            print(f"Signal: {signal}")
+
+            # DEBUG OUTPUT
+            print(pair)
+            print(f"RSI={rsi:.2f}")
+            print(f"PRICE={price:,.0f}")
+            print(f"EMA200={ema200:,.0f}")
+            print(f"SIGNAL={signal}")
+        
 
             telegram_report += (
                  f"{pair}\n"
                  f"RSI: {round(rsi, 2)}\n"
-                f"EMA200: {round(ema200, 2)}\n"
-                f"Price: Rp{current_price}\n"
-                f"Signal: {signal}\n\n"
+                 f"EMA200: {round(ema200, 2)}\n"
+                 f"Price: Rp{current_price}\n"
+                 f"Signal: {signal}\n\n"
             )
 
             # BUY
             if signal == "BUY" and wallet["cash"] > 0:
 
-                amount_btc = (
+                amount_coin = (
                     wallet["cash"] / current_price
                 )
 
-                wallet["holdings"][pair] = amount_btc
+                wallet["holdings"][pair] = amount_coin
                 wallet["cash"] = 0
 
                 wallet["last_buy_price"][pair] = current_price
@@ -145,7 +175,11 @@ def run_bot():
                 )
 
                 # TAKE PROFIT
-                if change_percent >= 3:
+                if (
+                    (pair == "BTC/IDR" and change_percent >= 5)
+                    or
+                    (pair == "SOL/IDR" and change_percent >= 7)
+                ):
 
                     wallet["cash"] = (
                         wallet["holdings"][pair] * current_price
@@ -173,7 +207,11 @@ def run_bot():
                     paper_wallet.save_wallet(wallet)
 
                 # STOP LOSS
-                elif change_percent <= -2:
+                elif (
+                    (pair == "BTC/IDR" and change_percent <= -2)
+                    or
+                    (pair == "SOL/IDR" and change_percent <= -2.5)
+                ):
 
                     wallet["cash"] = (
                         wallet["holdings"][pair] * current_price
@@ -241,10 +279,18 @@ def run_bot():
                     current_price
                 )
 
-            portfolio_value = (
-                wallet["cash"]
-                + (wallet["holdings"][pair] * current_price)
-            )
+            portfolio_value = wallet["cash"]
+
+            for p in PAIRS:
+
+                if wallet["holdings"][p] > 0:
+
+                    ticker_temp = exchange.fetch_ticker(p)
+
+                    portfolio_value += (
+                        wallet["holdings"][p]
+                        * ticker_temp["last"]
+                    )
 
             print(f"Cash: Rp{wallet['cash']:,.0f}")
             coin_name = pair.split('/')[0]
